@@ -1,0 +1,331 @@
+/* ============================================================
+   HORACE MANN DESIGN SYSTEM
+   Colors + Typography Foundations
+   ============================================================
+   An elevated, editorial reinterpretation of the Horace Mann
+   brand. Anchored by the iconic owl-orange and a richer, more
+   saturated midnight ink. Built for confident, business-grade
+   communications that still feel modern and human.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ----------------------------------------------------------
+     BRAND COLORS — primary palette
+     The Ember (orange) and Midnight (deep teal-navy) are the
+     two non-negotiables. Everything else supports.
+     ---------------------------------------------------------- */
+  --hm-ember:           #E1771E;   /* Primary brand orange — the owl, the action */
+  --hm-ember-deep:      #C2410C;   /* Hover / pressed orange */
+  --hm-ember-soft:      #F4B27A;   /* Disabled / hover bg / tints */
+  --hm-ember-wash:      #FBEEDC;   /* Subtle bg wash, callouts */
+
+  --hm-midnight:        #0A1F2C;   /* Deep midnight teal-navy — primary ink */
+  --hm-midnight-deep:   #061320;   /* Section bg, dark surfaces */
+  --hm-steel:           #1C4B66;   /* Mid blue — secondary brand color */
+  --hm-steel-soft:      #4A7C95;   /* Quiet steel for borders/labels */
+
+  /* ----------------------------------------------------------
+     SUPPORTING COLORS — used sparingly, with intention
+     ---------------------------------------------------------- */
+  --hm-sage:            #216865;   /* Tertiary accent — data viz, badges */
+  --hm-sage-soft:       #8FB8B5;
+  --hm-amber:           #F0B72F;   /* Highlight — pull-quote underlines, marks */
+  --hm-clay:            #B05839;   /* Deep terracotta — long-form alt */
+  --hm-plum:            #664559;   /* Editorial accent — pull from theme */
+
+  /* ----------------------------------------------------------
+     PAPER & INK — surfaces
+     Warm paper > pure white. It's editorial and feels printed.
+     ---------------------------------------------------------- */
+  --hm-paper:           #F7F2EA;   /* Default warm paper bg */
+  --hm-paper-deep:      #EFE7D6;   /* Card-on-paper, sections */
+  --hm-bone:            #FAF7F1;   /* Lightest tint */
+  --hm-white:           #FFFFFF;
+  --hm-ink:             #0A1F2C;   /* Same as midnight, semantic alias */
+  --hm-ink-2:           #2E5665;   /* Secondary text */
+  --hm-ink-3:           #66676C;   /* Tertiary / labels */
+  --hm-ink-4:           #9B9C9F;   /* Quiet / disabled */
+  --hm-rule:            #DCD3C0;   /* Hairline rule on paper */
+  --hm-rule-strong:     #B7AC93;
+  --hm-rule-dark:       #1F3B4D;   /* Hairline on dark */
+
+  /* ----------------------------------------------------------
+     SEMANTIC — feedback states
+     ---------------------------------------------------------- */
+  --hm-success:         #216865;
+  --hm-success-soft:    #DCE9E5;
+  --hm-warning:         #C28109;
+  --hm-warning-soft:    #FBEEDC;
+  --hm-danger:          #A6321F;
+  --hm-danger-soft:     #F2D9D2;
+  --hm-info:            #1C4B66;
+  --hm-info-soft:       #D6E2EA;
+
+  /* ----------------------------------------------------------
+     SEMANTIC FOREGROUND/BACKGROUND ALIASES
+     Use these in app code; they swap cleanly for dark mode.
+     ---------------------------------------------------------- */
+  --fg-1: var(--hm-midnight);
+  --fg-2: var(--hm-ink-2);
+  --fg-3: var(--hm-ink-3);
+  --fg-4: var(--hm-ink-4);
+  --fg-inverse: var(--hm-bone);
+  --fg-accent: var(--hm-ember);
+
+  --bg-1: var(--hm-paper);
+  --bg-2: var(--hm-paper-deep);
+  --bg-3: var(--hm-bone);
+  --bg-elevated: var(--hm-white);
+  --bg-inverse: var(--hm-midnight);
+
+  --border-1: var(--hm-rule);
+  --border-2: var(--hm-rule-strong);
+  --border-strong: var(--hm-midnight);
+
+  /* ----------------------------------------------------------
+     TYPE — families (matches horacemann.com)
+     - Montserrat: display + headlines (used by horacemann.com)
+     - Inter: UI + body (used by horacemann.com)
+     - JetBrains Mono: code, data, ticker-style labels
+     ---------------------------------------------------------- */
+  --font-display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans:    'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ----------------------------------------------------------
+     TYPE — fluid scale
+     Built for 1920×1080 hero comps that also work at 1280.
+     Mobile/web use the static rem values.
+     ---------------------------------------------------------- */
+  --t-eyebrow: 12px;          /* uppercase labels */
+  --t-caption: 13px;
+  --t-body-sm: 14px;
+  --t-body:    16px;
+  --t-body-lg: 18px;
+  --t-lead:    21px;          /* deck/lede paragraph */
+  --t-h6:      18px;
+  --t-h5:      22px;
+  --t-h4:      28px;
+  --t-h3:      36px;
+  --t-h2:      52px;
+  --t-h1:      80px;
+  --t-display: 128px;
+
+  /* Letter-spacing — used sparingly. Tight for display, open for eyebrow. */
+  --tracking-display: -0.025em;
+  --tracking-headline: -0.015em;
+  --tracking-body: -0.005em;
+  --tracking-eyebrow: 0.14em;
+
+  /* Line heights */
+  --lh-display: 0.96;
+  --lh-headline: 1.05;
+  --lh-tight: 1.15;
+  --lh-body: 1.5;
+  --lh-loose: 1.65;
+
+  /* ----------------------------------------------------------
+     SPACING — 4px base; bias toward 8/16/24/40/64 for layout
+     ---------------------------------------------------------- */
+  --space-0:   0;
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+  --space-32:  128px;
+
+  /* ----------------------------------------------------------
+     RADII — generally restrained; 2-4px for inputs, 12-16 for cards
+     ---------------------------------------------------------- */
+  --radius-0:  0;
+  --radius-1:  2px;
+  --radius-2:  4px;
+  --radius-3:  8px;
+  --radius-4:  12px;
+  --radius-5:  16px;
+  --radius-6:  24px;
+  --radius-pill: 999px;
+
+  /* ----------------------------------------------------------
+     SHADOWS — soft, paper-like. Avoid harsh modern web shadows.
+     ---------------------------------------------------------- */
+  --shadow-1: 0 1px 0 rgba(10, 31, 44, 0.04), 0 1px 2px rgba(10, 31, 44, 0.06);
+  --shadow-2: 0 2px 4px rgba(10, 31, 44, 0.05), 0 4px 12px rgba(10, 31, 44, 0.06);
+  --shadow-3: 0 4px 12px rgba(10, 31, 44, 0.08), 0 16px 32px -8px rgba(10, 31, 44, 0.1);
+  --shadow-4: 0 24px 56px -16px rgba(10, 31, 44, 0.22), 0 8px 16px -8px rgba(10, 31, 44, 0.1);
+  --shadow-inset: inset 0 0 0 1px var(--hm-rule);
+  --shadow-focus: 0 0 0 3px rgba(225, 119, 30, 0.35);
+
+  /* ----------------------------------------------------------
+     MOTION
+     ---------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 360ms;
+}
+
+/* ============================================================
+   SEMANTIC TYPE CLASSES
+   ============================================================ */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--t-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--hm-ember);
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: var(--t-display);
+  font-weight: 800;
+  line-height: var(--lh-display);
+  letter-spacing: var(--tracking-display);
+  color: var(--fg-1);
+}
+
+h1, .h1 {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  font-weight: 800;
+  line-height: var(--lh-headline);
+  letter-spacing: var(--tracking-display);
+  color: var(--fg-1);
+  margin: 0;
+}
+
+h2, .h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  font-weight: 700;
+  line-height: var(--lh-headline);
+  letter-spacing: var(--tracking-headline);
+  color: var(--fg-1);
+  margin: 0;
+}
+
+h3, .h3 {
+  font-family: var(--font-sans);
+  font-size: var(--t-h3);
+  font-weight: 600;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-headline);
+  color: var(--fg-1);
+  margin: 0;
+}
+
+h4, .h4 {
+  font-family: var(--font-sans);
+  font-size: var(--t-h4);
+  font-weight: 600;
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-headline);
+  color: var(--fg-1);
+  margin: 0;
+}
+
+h5, .h5 {
+  font-family: var(--font-sans);
+  font-size: var(--t-h5);
+  font-weight: 600;
+  line-height: var(--lh-tight);
+  color: var(--fg-1);
+  margin: 0;
+}
+
+h6, .h6 {
+  font-family: var(--font-sans);
+  font-size: var(--t-h6);
+  font-weight: 600;
+  line-height: var(--lh-tight);
+  color: var(--fg-1);
+  margin: 0;
+}
+
+.lead {
+  font-family: var(--font-sans);
+  font-size: var(--t-lead);
+  font-weight: 400;
+  line-height: var(--lh-loose);
+  letter-spacing: var(--tracking-body);
+  color: var(--fg-2);
+}
+
+p, .p {
+  font-family: var(--font-sans);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: var(--lh-body);
+  letter-spacing: var(--tracking-body);
+  color: var(--fg-2);
+  margin: 0;
+}
+
+.caption {
+  font-family: var(--font-sans);
+  font-size: var(--t-caption);
+  font-weight: 400;
+  line-height: var(--lh-tight);
+  color: var(--fg-3);
+}
+
+.mono, code {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  letter-spacing: 0;
+}
+
+.pullquote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  color: var(--fg-1);
+}
+
+.bignum {
+  font-family: var(--font-display);
+  font-size: 120px;
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  color: var(--hm-ember);
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+.bg-paper       { background: var(--hm-paper); }
+.bg-paper-deep  { background: var(--hm-paper-deep); }
+.bg-midnight    { background: var(--hm-midnight); color: var(--fg-inverse); }
+.bg-ember       { background: var(--hm-ember); color: var(--hm-white); }
+
+.text-ember     { color: var(--hm-ember); }
+.text-midnight  { color: var(--hm-midnight); }
+.text-steel     { color: var(--hm-steel); }
+.text-sage      { color: var(--hm-sage); }
+
+.italic-serif   { font-family: var(--font-display); font-style: italic; }
+
+/* A signature underline — soft amber marker behind text */
+.marker {
+  background: linear-gradient(180deg, transparent 60%, var(--hm-amber) 60%, var(--hm-amber) 92%, transparent 92%);
+  padding: 0 0.1em;
+}
