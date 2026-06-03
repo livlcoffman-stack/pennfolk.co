@@ -1635,12 +1635,66 @@
       return JSON.parse(JSON.stringify(value));
     }
 
+    // Month tokens present in the data are standard abbreviations, with or
+    // without a trailing period ("Nov." or "Nov"). Full names accepted too.
+    const MONTH_INDEX = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7,
+      sep: 8, sept: 8, oct: 9, nov: 10, dec: 11,
+      january: 0, february: 1, march: 2, april: 3, june: 5, july: 6,
+      august: 7, september: 8, october: 9, november: 10, december: 11
+    };
+
+    function makeLocalDate(year, monthIndex, day) {
+      const date = new Date(year, monthIndex, day);
+      // Reject values that Date silently rolls over (month 13, day 40, etc.).
+      if (
+        Number.isNaN(date.getTime()) ||
+        date.getFullYear() !== year ||
+        date.getMonth() !== monthIndex ||
+        date.getDate() !== day
+      ) {
+        return null;
+      }
+      return date;
+    }
+
+    // Parses only the formats that actually appear in the data. Anything else
+    // returns null so it can be surfaced rather than silently misread.
     function parseDisplayDate(value) {
       const text = String(value || "").trim();
       if (!text) return null;
-      const normalized = text.replace(/^([A-Za-z]+)\./, "$1");
-      const parsed = new Date(normalized);
-      return Number.isNaN(parsed.getTime()) ? null : parsed;
+      let match = text.match(/^([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(\d{4})$/);
+      if (match) {
+        const monthIndex = MONTH_INDEX[match[1].toLowerCase()];
+        return monthIndex === undefined ? null : makeLocalDate(Number(match[3]), monthIndex, Number(match[2]));
+      }
+      match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (match) return makeLocalDate(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+      match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+      if (match) {
+        let year = Number(match[3]);
+        if (year < 100) year += 2000;
+        return makeLocalDate(year, Number(match[1]) - 1, Number(match[2]));
+      }
+      return null;
+    }
+
+    // Classifies a date string for data-health surfacing. The dataset uses
+    // first-of-month values as stand-ins, so a parsed day of 1 is treated as
+    // an unconfirmed placeholder rather than a trusted deadline. Returns one
+    // of: "empty", "invalid", "placeholder", "confirmed".
+    function analyzeDate(value) {
+      const raw = String(value || "").trim();
+      if (!raw) return { raw, date: null, status: "empty" };
+      const date = parseDisplayDate(raw);
+      if (!date) return { raw, date: null, status: "invalid" };
+      if (date.getDate() === 1) return { raw, date, status: "placeholder" };
+      return { raw, date, status: "confirmed" };
+    }
+
+    function isUnconfirmedDate(value) {
+      const status = analyzeDate(value).status;
+      return status === "placeholder" || status === "invalid";
     }
 
     function getBaseState(code) {
@@ -1651,11 +1705,16 @@
       const base = getBaseState(state.selectedStateCode);
       if (!base) return null;
       const override = state.overrides[state.selectedStateCode];
-      if (!override) return deepClone(base);
+      if (!override) {
+        const clone = deepClone(base);
+        clone.summary = getDerivedSummary(clone);
+        return clone;
+      }
       const merged = deepClone(base);
       for (const key of ["summary", "partnerships", "benefits", "contacts", "events"]) {
         if (override[key] !== undefined) merged[key] = deepClone(override[key]);
       }
+      merged.summary = getDerivedSummary(merged);
       return merged;
     }
 
@@ -1691,6 +1750,20 @@
         attended_2026_count: item.events.filter(event => event.attended_2026).length,
         total_investment: item.partnerships.reduce((sum, partnership) => sum + Number(partnership.budgeted_amount || 0), 0)
       };
+    }
+
+    // Always prefer counts derived from the live arrays; fall back to the
+    // precomputed summary only when the arrays are not present. This keeps the
+    // sidebar, filters, and landing rollups honest even if a precomputed
+    // summary drifts from the underlying records.
+    function getDerivedSummary(item) {
+      if (!item) return {};
+      const ready =
+        Array.isArray(item.partnerships) &&
+        Array.isArray(item.benefits) &&
+        Array.isArray(item.contacts) &&
+        Array.isArray(item.events);
+      return ready ? computeSummary(item) : (item.summary || {});
     }
 
     function getActiveFilterCount(filters) {
@@ -2276,13 +2349,15 @@
           <h3>${frontLabels[state.frontFilter] || "States"}</h3>
           <p>${visibleStates.length} state${visibleStates.length === 1 ? "" : "s"} match the current section and search. Click a state to open the full workspace.</p>
           <div class="landing-state-grid">
-            ${visibleStates.length ? visibleStates.map(item => `
+            ${visibleStates.length ? visibleStates.map(item => {
+              const summary = getDerivedSummary(item);
+              return `
               <button class="landing-state-card" type="button" data-state="${item.state_code}">
                 <strong>${item.state_code} - ${item.state_name}</strong>
-                <span>${item.summary.partnership_count} partnerships${state.quickMode === "agent" ? "" : ` · ${formatMoney(item.summary.total_investment)}`} · ${item.summary.event_count} events</span>
+                <span>${summary.partnership_count} partnerships${state.quickMode === "agent" ? "" : ` · ${formatMoney(summary.total_investment)}`} · ${summary.event_count} events</span>
                 <div class="landing-state-meta">
-                  ${(item.summary.event_count || 0) ? '<span class="state-flag">Events</span>' : ""}
-                  ${(item.summary.partnership_count || 0) ? '<span class="state-flag">Agreements</span>' : ""}
+                  ${(summary.event_count || 0) ? '<span class="state-flag">Events</span>' : ""}
+                  ${(summary.partnership_count || 0) ? '<span class="state-flag">Agreements</span>' : ""}
                   ${(() => {
                     const current = getStateByCode(item.state_code) || item;
                     return [
@@ -2296,7 +2371,8 @@
                   })()}
                 </div>
               </button>
-            `).join("") : `<div class="empty">No states match the current section.</div>`}
+            `;
+            }).join("") : `<div class="empty">No states match the current section.</div>`}
           </div>
         `;
         elements.landingPanel.querySelectorAll("[data-state]").forEach(button => {
@@ -2446,6 +2522,15 @@
       }).length;
       const staffingGaps = current.events.filter(item => !(item.selected_attendees || []).length && !String(item.future_attending || "").trim()).length;
       const contactGaps = current.contacts.filter(item => !String(item.primary_email || "").trim()).length;
+      const unconfirmedDates = current.events.filter(item =>
+        isUnconfirmedDate(item.start_date) || isUnconfirmedDate(item.end_date)
+      ).length;
+      // Owner fields that can carry a name onto a staffing export.
+      const ownerFields = ["primary_owner", "primary_field_leader", "field_sales_ac", "new_growing_ac", "worksite_owner", "national_market_owner"];
+      const hasOwnedPartnership = (current.partnerships || []).some(item => String(item.primary_owner || "").trim());
+      const eventOwnerGaps = hasOwnedPartnership
+        ? current.events.filter(item => !ownerFields.some(field => String(item[field] || "").trim())).length
+        : 0;
       return [
         {
           label: "Unmatched Event Partners",
@@ -2471,6 +2556,16 @@
           label: "Contact Email Gaps",
           value: contactGaps,
           text: "Contacts missing a primary email for warm intro coordination."
+        },
+        {
+          label: "Unconfirmed Event Dates",
+          value: unconfirmedDates,
+          text: "Events using first-of-month stand-in dates or unparseable dates. Confirm these before trusting the expiring, registration, and timeline views."
+        },
+        {
+          label: "Owner Gaps on Events",
+          value: eventOwnerGaps,
+          text: "Events with no owner while this state has owned partnerships. These can drop names from staffing exports."
         }
       ];
     }
@@ -2666,10 +2761,11 @@
           row.setAttribute("role", "listitem");
           const button = document.createElement("button");
           const isActiveState = item.state_code === state.selectedStateCode;
+          const summary = getDerivedSummary(item);
           button.className = `state-button${isActiveState ? " active" : ""}`;
           button.setAttribute("aria-label", `Open ${item.state_name} workspace`);
           if (isActiveState) button.setAttribute("aria-current", "true");
-          button.innerHTML = `<strong>${item.state_code} - ${item.state_name}</strong><span>${item.summary.partnership_count} partnerships${state.quickMode === "agent" ? "" : ` · ${formatMoney(item.summary.total_investment)}`} · ${item.summary.event_count} events</span>`;
+          button.innerHTML = `<strong>${item.state_code} - ${item.state_name}</strong><span>${summary.partnership_count} partnerships${state.quickMode === "agent" ? "" : ` · ${formatMoney(summary.total_investment)}`} · ${summary.event_count} events</span>`;
           button.addEventListener("click", () => {
             state.selectedStateCode = item.state_code;
             render();
